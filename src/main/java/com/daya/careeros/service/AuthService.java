@@ -7,6 +7,8 @@ import com.daya.careeros.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.daya.careeros.exception.DuplicateEmailException;
+import com.daya.careeros.dto.LoginRequest;
+import com.daya.careeros.exception.InvalidCredentialsException;
 
 @Service
 public class AuthService {
@@ -16,8 +18,7 @@ public class AuthService {
 
     public AuthService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
-    ) {
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -38,7 +39,21 @@ public class AuthService {
         return new AuthResponse(
                 savedUser.getId(),
                 savedUser.getName(),
-                savedUser.getEmail()
-        );
+                savedUser.getEmail());
+    }
+
+    public AuthResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        return new AuthResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail());
     }
 }
