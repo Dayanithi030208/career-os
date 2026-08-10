@@ -9,6 +9,8 @@ import com.daya.careeros.exception.InvalidCredentialsException;
 import com.daya.careeros.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.daya.careeros.dto.UserResponse;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -77,4 +79,17 @@ public class AuthService {
                 token
         );
     }
+    public UserResponse getCurrentUser(UUID userId) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() ->
+                    new IllegalArgumentException("User not found")
+            );
+
+        return new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
+        }
 }
